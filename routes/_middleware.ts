@@ -2,26 +2,8 @@
 import { FreshContext  } from "$fresh/server.ts";
 import { getCookies } from "$std/http/cookie.ts";
 // import { verifyAuthToken } from "@/lib/auth.ts";
+import {ALLOW_NEXT} from '../config/router.ts'
 
-// 公共路径白名单（无需登录）
-const PUBLIC_PATHS = [
-  "/login",
-  "/register",
-  "/api/login",
-  "/api/register",
-  "/_frsh/",     // Fresh 框架内部资源
-  "/static/",    // 静态文件目录
-  "/favicon.ico",
-  "/robots.txt",
-  "/styles.css"
-];
-
-const isPublic = (pathname: string) => {
-    return PUBLIC_PATHS.some((p) => {
-        if (p.endsWith("/")) return pathname.startsWith(p);
-        return pathname === p;
-      });
-}
 
 // export const handler: Handlers = {
 //   async GET(req, ctx) {
@@ -44,13 +26,8 @@ export async function handler(
     const url = new URL(req.url);
   const pathname = url.pathname;
 
-  // 检查是否属于公共路径
-  const _isPublic = isPublic(pathname)
-
-  console.log(_isPublic, pathname)
-
-  // Case 2: 公共路径 → 直接放行
-  if (_isPublic) return ctx.next();
+  const allow = ALLOW_NEXT(pathname)
+  if (allow) return ctx.next()
 
   // 验证用户登录状态
   const cookies = getCookies(req.headers);
