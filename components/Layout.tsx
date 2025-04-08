@@ -1,14 +1,27 @@
-export default function Layout() {
+import { FunctionalComponent, JSX } from "preact";
+
+type LayoutProps = {
+  aside?: JSX.Element;
+};
+
+const Layout: FunctionalComponent<LayoutProps> = ({ children, aside }) => {
   return (
-    <div class="chat-container flex flex-col max-w-7xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-      <h1>111</h1>
-      <h1>111</h1>
-      <h1>111</h1>
-      <h1>111</h1>
-      <h1>111</h1>
-      <h1>111</h1>
-      <h1>111</h1>
-      <h1>111</h1>
+    <div className="drawer lg:drawer-open">
+      <input id="aside-drawer" type="checkbox" className="drawer-toggle" />
+      <div className="drawer-content">
+        {children}
+      </div>
+      <div className="drawer-side">
+        <label
+          htmlFor="aside-drawer"
+          aria-label="close sidebar"
+          className="drawer-overlay"
+        >
+        </label>
+        {aside}
+      </div>
     </div>
   );
-}
+};
+
+export default Layout;

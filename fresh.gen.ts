@@ -9,7 +9,7 @@ import * as $api_ws from "./routes/api/ws.ts";
 import * as $index from "./routes/index.tsx";
 import * as $login from "./routes/login.tsx";
 import * as $register from "./routes/register.tsx";
-
+import * as $Session from "./islands/Session.tsx";
 import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
@@ -22,7 +22,9 @@ const manifest = {
     "./routes/login.tsx": $login,
     "./routes/register.tsx": $register,
   },
-  islands: {},
+  islands: {
+    "./islands/Session.tsx": $Session,
+  },
   baseUrl: import.meta.url,
 } satisfies Manifest;
 
