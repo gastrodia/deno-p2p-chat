@@ -32,5 +32,3 @@ jobs:
           project: "gastrodia-deno-p2p-chat"
           entrypoint: "main.ts"
           root: "."
-          
-          

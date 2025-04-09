@@ -33,7 +33,9 @@ export default function Chat() {
         <div className="chat-bubble">I hate you!</div>
         <div className="chat-footer opacity-50">Seen at 12:46</div>
       </div>
-      <div className="badge badge-outline badge-neutral block m-auto">deno加入了对话</div>
+      <div className="badge badge-outline badge-neutral block m-auto">
+        deno加入了对话
+      </div>
       <div className="chat chat-start">
         <div className="chat-image avatar">
           <div className="w-10 rounded-full">

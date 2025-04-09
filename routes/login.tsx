@@ -1,10 +1,16 @@
 import { Handlers, PageProps } from "$fresh/server.ts";
+import { User, UserDB } from "../db/user.ts";
+import { z } from "zod";
+import { ExclamationIcon } from "../components/Icons.tsx";
 
-interface LoginForm {
-  email?: string;
-  password?: string;
+const LoginSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+type LoginForm = Partial<Pick<User, "email" | "password">> & {
   error?: string;
-}
+};
 
 export default function Login(props: PageProps<LoginForm>) {
   const { data } = props;
@@ -16,20 +22,7 @@ export default function Login(props: PageProps<LoginForm>) {
             {data?.error
               ? (
                 <div role="alert" className="alert">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    className="stroke-info h-6 w-6 shrink-0"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    >
-                    </path>
-                  </svg>
+                  <ExclamationIcon />
                   <span>{data.error}</span>
                 </div>
               )
@@ -57,7 +50,11 @@ export default function Login(props: PageProps<LoginForm>) {
                   required
                   name="password"
                 />
-                <p className="validator-hint">Required</p>
+                <p className="validator-hint">
+                  Required
+                  <br />
+                  Must be more than 6 characters, including
+                </p>
               </div>
 
               <button className="btn btn-neutral" type="submit">Sign in</button>
@@ -78,20 +75,42 @@ export default function Login(props: PageProps<LoginForm>) {
 
 export const handler: Handlers<LoginForm> = {
   async POST(req, ctx) {
-    const form = await req.formData();
-    const email = form.get("email")?.toString();
-    // return ctx.render({
-    //   error: "邮箱和密码不能为空",
-    //   email, // 回填已输入邮箱
-    // });
+    const formData = await req.formData();
+    const vo: LoginForm = Object.fromEntries(formData.entries());
+
+    // Validate with Zod
+    const valid = LoginSchema.safeParse(vo);
+
+    if (!valid.success) {
+      return ctx.render({
+        email: vo.email, // 回填已输入邮箱
+        error: valid.error.issues.reduce(
+          (c, p, i) => `${c}${i ? ";" : ""}${p.message}`,
+          "",
+        ),
+      });
+    }
+
     // 服务端验证逻辑
+    const { email, password } = valid.data;
+    const userService = await UserDB.create();
+
+    const cookie = await userService.login(email, password);
+
+    if (!cookie) {
+      return ctx.render({
+        email,
+        error: "Invalid email or password",
+      });
+    }
+
     const url = new URL(req.url);
     const redirectTo = url.searchParams.get("redirect") || "/";
     return new Response("", {
       status: 302,
       headers: {
         Location: redirectTo,
-        "Set-Cookie": `token=${email}; Path=/; HttpOnly; Secure; SameSite=Lax`,
+        "Set-Cookie": `auth=${cookie}; Path=/; HttpOnly; Secure; SameSite=Lax`,
       },
     });
   },
