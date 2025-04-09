@@ -29,6 +29,6 @@ jobs:
       - name: Upload to Deno Deploy
         uses: denoland/deployctl@v1
         with:
-          project: "gastrodia-deno-p2p-chat"
+          project: "deno-p2p-chat"
           entrypoint: "main.ts"
           root: "."
