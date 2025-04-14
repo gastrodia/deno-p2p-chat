@@ -95,7 +95,6 @@ export const handler: Handlers<RegisterForm> = {
 
     if (!valid.success) {
       console.log(valid)
-      debugger
       return ctx.render({
         email: vo.email, // 回填已输入邮箱
         username: vo.username,

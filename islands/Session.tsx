@@ -26,7 +26,7 @@ const Session = () => {
 
   return (
     <div className="list bg-base-100 rounded-box shadow-md">
-      <button className="btn" onClick={handleClick}>Default</button>
+      <button type="button" className="btn" onClick={handleClick}>Default</button>
       {list.map((item) => (
         <a href={`/app/${item}`} className={`list-row hover:bg-gray-100`}>
           <div>
