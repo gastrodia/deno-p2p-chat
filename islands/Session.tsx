@@ -1,12 +1,34 @@
+import { useWsContext } from "./WsProvider.tsx";
+import { useEffect } from "preact/hooks";
+
 const Session = () => {
   const list = [1, 2, 3, 4, 5];
+  const wsContext = useWsContext();
+
+  const handleClick = () => {
+    console.log(wsContext)
+    wsContext.ws?.send({ type: "A", data: ["1"] });
+  };
+
+  useEffect(() => {
+    const { ws } = wsContext;
+    if (!ws) {
+      return;
+    }
+    console.log(ws);
+    ws.on("B", (data) => {
+      console.log("B", data.data);
+    });
+    ws.on("B", (data) => {
+      console.log("Bc", data.data);
+    });
+  }, [wsContext]);
+
   return (
-    <ul className="list bg-base-100 rounded-box shadow-md">
-      <li className="p-4 tracking-wide">
-        对话
-      </li>
+    <div className="list bg-base-100 rounded-box shadow-md">
+      <button className="btn" onClick={handleClick}>Default</button>
       {list.map((item) => (
-        <li className="list-row">
+        <a href={`/app/${item}`} className={`list-row hover:bg-gray-100`}>
           <div>
             <img
               className="size-10 rounded-box"
@@ -19,28 +41,9 @@ const Session = () => {
               Remaining Reason
             </div>
           </div>
-        </li>
+        </a>
       ))}
-      <li className="p-4 pb-2 tracking-wide">
-        在线的陌生用户
-      </li>
-      {list.map((item) => (
-        <li className="list-row">
-          <div>
-            <img
-              className="size-10 rounded-box"
-              src={`https://img.daisyui.com/images/profile/demo/${item}@94.webp`}
-            />
-          </div>
-          <div>
-            <div>Dio Lupa</div>
-            <div className="text-xs uppercase font-semibold opacity-60">
-              Remaining Reason
-            </div>
-          </div>
-        </li>
-      ))}
-    </ul>
+    </div>
   );
 };
 

@@ -3,7 +3,7 @@ import { User } from "@/db/user.ts";
 
 const Profile: FunctionalComponent<User> = (props) => {
   return (
-    <a className="flex p-4 gap-4" href="/">
+    <a className="flex p-4 gap-4" href="/app">
       <div className="shadow-md">
         <img
           className="size-10 rounded-box"

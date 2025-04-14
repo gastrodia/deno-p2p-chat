@@ -1,9 +1,13 @@
 import randomAvatar from "@/utils/avatar.ts";
+import { DenoKV } from "./denoKV.ts";
 
-export interface User {
+export interface SafeUser {
   id: string;
   avatar: string;
   username: string;
+}
+
+export interface User extends SafeUser {
   password: string;
   email: string;
   createdAt: Date;
@@ -19,7 +23,6 @@ export class UserDB {
   }
 
   async login(email: string, password: string): Promise<string | null> {
-    console.log("111");
     // Find user by email
     const users = await this.kv.list<User>({ prefix: ["users"] });
     for await (const user of users) {
@@ -31,13 +34,17 @@ export class UserDB {
   }
 
   async auth(cookie?: string) {
-    if (!cookie) return null;
+    if (!cookie) {
+      return null;
+    }
     const [email, userId] = cookie.split("/");
-
-    if (!email || !userId) return null;
-
+    if (!email || !userId) {
+      return null;
+    }
     const user = await this.getUserById(userId);
-    if (user?.email === email) return user;
+    if (user?.email === email) {
+      return user;
+    }
     return null;
   }
 
@@ -45,7 +52,7 @@ export class UserDB {
     email: string,
     password: string,
     username: string,
-  ): Promise<User> {
+  ): Promise<User> { 
     // Check if email already exists
     const users = await this.kv.list<User>({ prefix: ["users"] });
     for await (const user of users) {
@@ -53,9 +60,7 @@ export class UserDB {
         throw new Error("Email already registered");
       }
     }
-
     const uuid = crypto.randomUUID();
-
     const newUser: User = {
       id: uuid.substring(uuid.lastIndexOf("-") + 1),
       avatar: await randomAvatar(),
@@ -64,13 +69,24 @@ export class UserDB {
       email,
       createdAt: new Date(),
     };
-
     await this.kv.set(["users", newUser.id], newUser);
     return newUser;
   }
 
-  async getUserById(id: string): Promise<User | null> {
+  async getUserById(id: string): Promise<User | null>;
+  async getUserById(id: string, safe: true): Promise<SafeUser | null>;
+  async getUserById(
+    id: string,
+    safe?: boolean,
+  ): Promise<User | SafeUser | null> {
     const user = await this.kv.get<User>(["users", id]);
+    if (!user.value) {
+      return null;
+    }
+    if (safe) {
+      const { id, avatar, username } = user.value;
+      return { id, avatar, username };
+    }
     return user.value;
   }
 
@@ -82,7 +98,6 @@ export class UserDB {
     if (!user) {
       throw new Error("User not found");
     }
-
     const updatedUser = { ...user, ...info };
     await this.kv.set(["users", id], updatedUser);
   }
@@ -90,11 +105,9 @@ export class UserDB {
   async getAllUser(): Promise<User[]> {
     const users: User[] = [];
     const entries = this.kv.list<User>({ prefix: ["users"] });
-
     for await (const entry of entries) {
       users.push(entry.value);
     }
-
     return users;
   }
 
@@ -102,21 +115,17 @@ export class UserDB {
     // 步骤：获取所有用户条目
     const entries = this.kv.list<User>({ prefix: ["users"] });
     const keys: Deno.KvKey[] = [];
-
     // 收集所有用户键
     for await (const entry of entries) {
       keys.push(entry.key);
     }
-
     // 步骤：分批次删除（每批10个）
     const BATCH_SIZE = 10;
     for (let i = 0; i < keys.length; i += BATCH_SIZE) {
       const batch = keys.slice(i, i + BATCH_SIZE);
       const atomic = this.kv.atomic();
-
       batch.forEach((key) => atomic.delete(key));
       const result = await atomic.commit();
-
       if (!result.ok) {
         throw new Error("Failed to delete user batch");
       }
@@ -124,8 +133,10 @@ export class UserDB {
   }
 
   static async create(): Promise<UserDB> {
-    if (UserDB.instance) return UserDB.instance;
-    const kv = await Deno.openKv();
+    if (UserDB.instance) {
+      return UserDB.instance;
+    }
+    const kv = await DenoKV.create();
     UserDB.instance = new UserDB(kv);
     return UserDB.instance;
   }

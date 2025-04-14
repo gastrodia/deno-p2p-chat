@@ -8,10 +8,13 @@ import * as $_middleware from "./routes/_middleware.ts";
 import * as $api_avatar from "./routes/api/avatar.ts";
 import * as $api_users from "./routes/api/users.ts";
 import * as $api_ws from "./routes/api/ws.ts";
-import * as $index from "./routes/index.tsx";
+import * as $app_id_ from "./routes/app/[id].tsx";
+import * as $app_layout from "./routes/app/_layout.tsx";
+import * as $app_index from "./routes/app/index.tsx";
 import * as $login from "./routes/login.tsx";
 import * as $register from "./routes/register.tsx";
 import * as $Session from "./islands/Session.tsx";
+import * as $WsProvider from "./islands/WsProvider.tsx";
 import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
@@ -22,12 +25,15 @@ const manifest = {
     "./routes/api/avatar.ts": $api_avatar,
     "./routes/api/users.ts": $api_users,
     "./routes/api/ws.ts": $api_ws,
-    "./routes/index.tsx": $index,
+    "./routes/app/[id].tsx": $app_id_,
+    "./routes/app/_layout.tsx": $app_layout,
+    "./routes/app/index.tsx": $app_index,
     "./routes/login.tsx": $login,
     "./routes/register.tsx": $register,
   },
   islands: {
     "./islands/Session.tsx": $Session,
+    "./islands/WsProvider.tsx": $WsProvider,
   },
   baseUrl: import.meta.url,
 } satisfies Manifest;

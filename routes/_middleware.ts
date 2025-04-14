@@ -16,6 +16,16 @@ export async function handler(
   const url = new URL(req.url);
   const pathname = url.pathname;
 
+  if (pathname === "/") {
+    return new Response("", {
+        status: 302,
+        headers: {
+          Location: "/app",
+        },
+      },
+    );
+  }
+
   const allow = ALLOW_NEXT(pathname);
   if (allow) return ctx.next();
 
