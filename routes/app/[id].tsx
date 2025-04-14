@@ -1,11 +1,11 @@
-import { PageProps } from "$fresh/server.ts";
+import { PageProps } from "$fresh/server.ts"
 
-const ChatRoom = ({params}: PageProps) => {
+const ChatRoom = ({ params }: PageProps) => {
   return (
     <h1>
       {params.id}
     </h1>
-  );
-};
+  )
+}
 
-export default ChatRoom;
+export default ChatRoom

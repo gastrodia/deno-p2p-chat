@@ -1,9 +1,9 @@
-import { FunctionalComponent, JSX } from "preact";
+import { FunctionalComponent, JSX } from "preact"
 
 type LayoutProps = {
-  session?: JSX.Element;
-  profile?: JSX.Element;
-};
+  session?: JSX.Element
+  profile?: JSX.Element
+}
 
 const Aside: FunctionalComponent<LayoutProps> = ({ profile, session }) => {
   return (
@@ -14,7 +14,7 @@ const Aside: FunctionalComponent<LayoutProps> = ({ profile, session }) => {
       <div className="divider m-0"></div>
       {profile}
     </div>
-  );
-};
+  )
+}
 
-export default Aside;
+export default Aside

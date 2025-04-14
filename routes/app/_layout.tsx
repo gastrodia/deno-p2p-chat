@@ -1,12 +1,12 @@
-import { PageProps } from "$fresh/server.ts";
-import { AppState } from "@/routes/_middleware.ts";
-import Aside from "@/components/Aside.tsx";
-import Profile from "@/components/Profile.tsx";
-import Session from "@/islands/Session.tsx";
-import WsProvider from "@/islands/WsProvider.tsx";
+import { PageProps } from "$fresh/server.ts"
+import { AppState } from "@/routes/_middleware.ts"
+import Aside from "@/components/Aside.tsx"
+import Profile from "@/components/Profile.tsx"
+import Session from "@/islands/Session.tsx"
+import WsProvider from "@/islands/WsProvider.tsx"
 
 const Layout = ({ state, params, Component }: PageProps<null, AppState>) => {
-  const user = state.user;
+  const user = state.user
   return (
     <WsProvider from={user.id} to={params.id}>
       <div className="drawer lg:drawer-open">
@@ -25,7 +25,7 @@ const Layout = ({ state, params, Component }: PageProps<null, AppState>) => {
         </div>
       </div>
     </WsProvider>
-  );
-};
+  )
+}
 
-export default Layout;
+export default Layout

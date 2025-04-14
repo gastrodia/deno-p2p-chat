@@ -74,5 +74,5 @@ export default function Chat() {
         <div className="chat-bubble">Not leave it in Darkness</div>
       </div>
     </>
-  );
+  )
 }

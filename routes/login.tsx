@@ -1,19 +1,19 @@
-import { Handlers, PageProps } from "$fresh/server.ts";
-import { User, UserDB } from "../db/user.ts";
-import { z } from "zod";
-import { ExclamationIcon } from "../components/Icons.tsx";
+import { Handlers, PageProps } from "$fresh/server.ts"
+import { User, UserDB } from "../db/user.ts"
+import { z } from "zod"
+import { ExclamationIcon } from "../components/Icons.tsx"
 
 const LoginSchema = z.object({
   email: z.string().email("Invalid email format"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-});
+})
 
 type LoginForm = Partial<Pick<User, "email" | "password">> & {
-  error?: string;
-};
+  error?: string
+}
 
 export default function Login(props: PageProps<LoginForm>) {
-  const { data } = props;
+  const { data } = props
   return (
     <div className="w-screen h-screen flex items-center justify-center bg-base-200">
       <div className="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
@@ -70,16 +70,16 @@ export default function Login(props: PageProps<LoginForm>) {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 export const handler: Handlers<LoginForm> = {
   async POST(req, ctx) {
-    const formData = await req.formData();
-    const vo: LoginForm = Object.fromEntries(formData.entries());
+    const formData = await req.formData()
+    const vo: LoginForm = Object.fromEntries(formData.entries())
 
     // Validate with Zod
-    const valid = LoginSchema.safeParse(vo);
+    const valid = LoginSchema.safeParse(vo)
 
     if (!valid.success) {
       return ctx.render({
@@ -88,30 +88,30 @@ export const handler: Handlers<LoginForm> = {
           (c, p, i) => `${c}${i ? ";" : ""}${p.message}`,
           "",
         ),
-      });
+      })
     }
 
     // 服务端验证逻辑
-    const { email, password } = valid.data;
-    const userService = await UserDB.create();
+    const { email, password } = valid.data
+    const userService = await UserDB.create()
 
-    const cookie = await userService.login(email, password);
+    const cookie = await userService.login(email, password)
 
     if (!cookie) {
       return ctx.render({
         email,
         error: "Invalid email or password",
-      });
+      })
     }
 
-    const url = new URL(req.url);
-    const redirectTo = url.searchParams.get("redirect") || "/";
+    const url = new URL(req.url)
+    const redirectTo = url.searchParams.get("redirect") || "/"
     return new Response("", {
       status: 302,
       headers: {
         Location: redirectTo,
         "Set-Cookie": `auth=${cookie}; Path=/; HttpOnly; Secure; SameSite=Lax`,
       },
-    });
+    })
   },
-};
+}

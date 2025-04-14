@@ -13,4 +13,4 @@ export const ExclamationIcon = () => (
     >
     </path>
   </svg>
-);
+)

@@ -1,28 +1,28 @@
-import { useWsContext } from "./WsProvider.tsx";
-import { useEffect } from "preact/hooks";
+import { useWsContext } from "./WsProvider.tsx"
+import { useEffect } from "preact/hooks"
 
 const Session = () => {
-  const list = [1, 2, 3, 4, 5];
-  const wsContext = useWsContext();
+  const list = [1, 2, 3, 4, 5]
+  const wsContext = useWsContext()
 
   const handleClick = () => {
     console.log(wsContext)
-    wsContext.ws?.send({ type: "A", data: ["1"] });
-  };
+    wsContext.ws?.send({ type: "A", data: ["1"] })
+  }
 
   useEffect(() => {
-    const { ws } = wsContext;
+    const { ws } = wsContext
     if (!ws) {
-      return;
+      return
     }
-    console.log(ws);
+    console.log(ws)
     ws.on("B", (data) => {
-      console.log("B", data.data);
-    });
+      console.log("B", data.data)
+    })
     ws.on("B", (data) => {
-      console.log("Bc", data.data);
-    });
-  }, [wsContext]);
+      console.log("Bc", data.data)
+    })
+  }, [wsContext])
 
   return (
     <div className="list bg-base-100 rounded-box shadow-md">
@@ -44,7 +44,7 @@ const Session = () => {
         </a>
       ))}
     </div>
-  );
-};
+  )
+}
 
-export default Session;
+export default Session

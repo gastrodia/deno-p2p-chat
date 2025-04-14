@@ -2,20 +2,20 @@
 // This file SHOULD be checked into source version control.
 // This file is automatically updated during development when running `dev.ts`.
 
-import * as $_404 from "./routes/_404.tsx";
-import * as $_app from "./routes/_app.tsx";
-import * as $_middleware from "./routes/_middleware.ts";
-import * as $api_avatar from "./routes/api/avatar.ts";
-import * as $api_users from "./routes/api/users.ts";
-import * as $api_ws from "./routes/api/ws.ts";
-import * as $app_id_ from "./routes/app/[id].tsx";
-import * as $app_layout from "./routes/app/_layout.tsx";
-import * as $app_index from "./routes/app/index.tsx";
-import * as $login from "./routes/login.tsx";
-import * as $register from "./routes/register.tsx";
-import * as $Session from "./islands/Session.tsx";
-import * as $WsProvider from "./islands/WsProvider.tsx";
-import type { Manifest } from "$fresh/server.ts";
+import * as $_404 from "./routes/_404.tsx"
+import * as $_app from "./routes/_app.tsx"
+import * as $_middleware from "./routes/_middleware.ts"
+import * as $api_avatar from "./routes/api/avatar.ts"
+import * as $api_users from "./routes/api/users.ts"
+import * as $api_ws from "./routes/api/ws.ts"
+import * as $app_id_ from "./routes/app/[id].tsx"
+import * as $app_layout from "./routes/app/_layout.tsx"
+import * as $app_index from "./routes/app/index.tsx"
+import * as $login from "./routes/login.tsx"
+import * as $register from "./routes/register.tsx"
+import * as $Session from "./islands/Session.tsx"
+import * as $WsProvider from "./islands/WsProvider.tsx"
+import type { Manifest } from "$fresh/server.ts"
 
 const manifest = {
   routes: {
@@ -36,6 +36,6 @@ const manifest = {
     "./islands/WsProvider.tsx": $WsProvider,
   },
   baseUrl: import.meta.url,
-} satisfies Manifest;
+} satisfies Manifest
 
-export default manifest;
+export default manifest

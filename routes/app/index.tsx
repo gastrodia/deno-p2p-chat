@@ -6,7 +6,7 @@ const Home = () => {
     >
       会话列表
     </label>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home

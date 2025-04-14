@@ -1,8 +1,8 @@
-import { Handlers, PageProps } from "$fresh/server.ts";
-import { User, UserDB } from "../db/user.ts";
-import { z } from "zod";
-import { ExclamationIcon } from "../components/Icons.tsx";
-import promiseToResult from "../utils/promiseToResult.ts";
+import { Handlers, PageProps } from "$fresh/server.ts"
+import { User, UserDB } from "../db/user.ts"
+import { z } from "zod"
+import { ExclamationIcon } from "../components/Icons.tsx"
+import promiseToResult from "../utils/promiseToResult.ts"
 
 const RegisterSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -11,14 +11,14 @@ const RegisterSchema = z.object({
     "Username Maximum 8 characters",
   ),
   password: z.string().min(6, "Password must be at least 6 characters"),
-});
+})
 
 type RegisterForm = Partial<Pick<User, "email" | "password" | "username">> & {
-  error?: string;
-};
+  error?: string
+}
 
 export default function Register(props: PageProps<RegisterForm>) {
-  const { data } = props;
+  const { data } = props
   return (
     <div className="w-screen h-screen flex items-center justify-center bg-base-200">
       <div className="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
@@ -82,20 +82,20 @@ export default function Register(props: PageProps<RegisterForm>) {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 export const handler: Handlers<RegisterForm> = {
   async POST(req, ctx) {
-    const formData = await req.formData();
-    const vo: RegisterForm = Object.fromEntries(formData.entries());
+    const formData = await req.formData()
+    const vo: RegisterForm = Object.fromEntries(formData.entries())
 
     // Validate with Zod
-    const valid = RegisterSchema.safeParse(vo);
+    const valid = RegisterSchema.safeParse(vo)
 
     if (!valid.success) {
-      console.log(valid);
-      debugger;
+      console.log(valid)
+      debugger
       return ctx.render({
         email: vo.email, // 回填已输入邮箱
         username: vo.username,
@@ -103,45 +103,45 @@ export const handler: Handlers<RegisterForm> = {
           (c, p, i) => `${c}${i ? ";" : ""}${p.message}`,
           "",
         ),
-      });
+      })
     }
 
     // 服务端验证逻辑
-    const { email, password, username } = valid.data;
-    const userService = await UserDB.create();
+    const { email, password, username } = valid.data
+    const userService = await UserDB.create()
     const [registerError, user] = await promiseToResult<User, Error>(
       userService.register(
         email,
         password,
         username,
       ),
-    );
+    )
 
     if (registerError) {
       return ctx.render({
         email: vo.email,
         username: vo.username,
         error: registerError.message,
-      });
+      })
     }
 
-    const cookie = await userService.login(user.email, user.password);
+    const cookie = await userService.login(user.email, user.password)
 
     if (!cookie) {
       return ctx.render({
         email,
         error: "Invalid email or password",
-      });
+      })
     }
 
-    const url = new URL(req.url);
-    const redirectTo = url.searchParams.get("redirect") || "/";
+    const url = new URL(req.url)
+    const redirectTo = url.searchParams.get("redirect") || "/"
     return new Response("", {
       status: 302,
       headers: {
         Location: redirectTo,
         "Set-Cookie": `auth=${cookie}; Path=/; HttpOnly; Secure; SameSite=Lax`,
       },
-    });
+    })
   },
-};
+}

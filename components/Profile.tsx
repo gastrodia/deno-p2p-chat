@@ -1,5 +1,5 @@
-import { FunctionalComponent } from "preact";
-import { User } from "@/db/user.ts";
+import { FunctionalComponent } from "preact"
+import { User } from "@/db/user.ts"
 
 const Profile: FunctionalComponent<User> = (props) => {
   return (
@@ -19,7 +19,7 @@ const Profile: FunctionalComponent<User> = (props) => {
         </div>
       </div>
     </a>
-  );
-};
+  )
+}
 
-export default Profile;
+export default Profile

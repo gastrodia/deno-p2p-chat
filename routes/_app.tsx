@@ -1,4 +1,4 @@
-import { type PageProps } from "$fresh/server.ts";
+import { type PageProps } from "$fresh/server.ts"
 export default function App({ Component }: PageProps) {
   return (
     <html>
@@ -12,5 +12,5 @@ export default function App({ Component }: PageProps) {
         <Component />
       </body>
     </html>
-  );
+  )
 }
