@@ -13,6 +13,7 @@ import * as $app_layout from "./routes/app/_layout.tsx"
 import * as $app_index from "./routes/app/index.tsx"
 import * as $login from "./routes/login.tsx"
 import * as $register from "./routes/register.tsx"
+import * as $AvatarUpload from "./islands/AvatarUpload.tsx"
 import * as $Session from "./islands/Session.tsx"
 import * as $WsProvider from "./islands/WsProvider.tsx"
 import type { Manifest } from "$fresh/server.ts"
@@ -32,6 +33,7 @@ const manifest = {
     "./routes/register.tsx": $register,
   },
   islands: {
+    "./islands/AvatarUpload.tsx": $AvatarUpload,
     "./islands/Session.tsx": $Session,
     "./islands/WsProvider.tsx": $WsProvider,
   },

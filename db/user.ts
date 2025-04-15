@@ -93,13 +93,14 @@ export class UserDB {
   async updateUserById(
     id: string,
     info: Partial<Pick<User, "avatar" | "username" | "password">>,
-  ): Promise<void> {
+  ) {
     const user = await this.getUserById(id)
     if (!user) {
       throw new Error("User not found")
     }
     const updatedUser = { ...user, ...info }
-    await this.kv.set(["users", id], updatedUser)
+    const result = await this.kv.set(["users", id], updatedUser)
+    return result.ok
   }
 
   async getAllUser(): Promise<User[]> {
