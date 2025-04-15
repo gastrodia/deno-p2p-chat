@@ -5,13 +5,14 @@ import { z } from "zod"
 import { UserDB } from "@/db/user.ts"
 import promiseToResult from "@/utils/promiseToResult.ts"
 import deno from "@/deno.json" with { type: "json" }
-import {ExclamationIcon} from "@/components/Icons.tsx";
+import { ExclamationIcon } from "@/components/Icons.tsx"
 import Header from "@/components/Header.tsx"
 import { useMemo } from "preact/hooks"
+import uploadFile from "@/utils/uploadFile.ts"
 
 interface UpdateUserForm {
   username?: string
-  avatar?: string
+  avatar?: string | File
   error?: string
 }
 
@@ -20,7 +21,12 @@ const UpdateUserSchema = z.object({
     8,
     "Username Maximum 8 characters",
   ),
-  avatar: z.string(),
+  avatar: z.union([
+    z.string(),
+    z.instanceof(File)
+      .refine((file) => file.size <= 2 * 1024 * 1024, "头像不能超过2MB")
+      .refine((file) => file.type.startsWith("image/"), "头像格式不正确"),
+  ]),
 })
 
 const Home = (props: PageProps<UpdateUserForm, AppState>) => {
@@ -41,13 +47,13 @@ const Home = (props: PageProps<UpdateUserForm, AppState>) => {
               </div>
             )
             : null}
-          <form method="POST">
+          <form method="POST" enctype="multipart/form-data">
             <div>
               <label className="fieldset-label">Avatar</label>
               <AvatarUpload
                 name="avatar"
                 required
-                initialPreview={data.avatar}
+                initialPreview={data.avatar as string}
               />
             </div>
 
@@ -69,9 +75,7 @@ const Home = (props: PageProps<UpdateUserForm, AppState>) => {
           </form>
         </fieldset>
       </div>
-      <div
-        className="collapse collapse-arrow bg-base-100 border-base-300 border"
-      >
+      <div className="collapse collapse-arrow bg-base-100 border-base-300 border">
         <input type="checkbox" />
         <div className="collapse-title font-semibold">ABOUT ?</div>
         <div className="collapse-content text-sm w-full overflow-x-auto">
@@ -99,7 +103,7 @@ export const handler: Handlers<UpdateUserForm, AppState> = {
     const formData = await req.formData()
     const vo: UpdateUserForm = Object.fromEntries(formData.entries())
 
-    const valid = UpdateUserSchema.safeParse(vo)
+    const valid = await UpdateUserSchema.safeParseAsync(vo)
     if (!valid.success) {
       return ctx.render({
         username: ctx.state.user.username,
@@ -111,8 +115,26 @@ export const handler: Handlers<UpdateUserForm, AppState> = {
       })
     }
 
+    const [uploadError, avatar] = valid.data.avatar instanceof File
+      ? await promiseToResult(
+        uploadFile(
+          valid.data.avatar,
+        ),
+      )
+      : [null, valid.data.avatar] as const
+
+    if (!avatar) {
+      return ctx.render({
+        ...vo,
+        avatar: ctx.state.user.avatar,
+        error: uploadError instanceof Error
+          ? uploadError.message
+          : "Upload error",
+      })
+    }
+
     const userService = await UserDB.create()
-    const { username, avatar } = valid.data
+    const { username } = valid.data
     const [error, ok] = await promiseToResult(
       userService.updateUserById(ctx.state.user.id, {
         username,
@@ -122,7 +144,7 @@ export const handler: Handlers<UpdateUserForm, AppState> = {
     if (!ok) {
       return ctx.render({
         ...vo,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : "Update error",
       })
     }
     ctx.state.user.avatar = avatar

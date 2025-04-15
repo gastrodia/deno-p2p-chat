@@ -1,13 +1,13 @@
-import { useCallback, useRef } from "preact/hooks"
-import { useSignal } from "@preact/signals"
-import { PlusIcon } from "@/components/Icons.tsx"
+import {useCallback, useEffect, useRef} from "preact/hooks"
+import {useSignal} from "@preact/signals"
+import {PlusIcon} from "@/components/Icons.tsx"
 
 interface Props {
   name?: string
   accept?: string
   required?: boolean
   initialPreview?: string // 新增初始预览属性
-  onUpload?: (base64: string) => void
+  onUpload?: (file: File) => void
   maxSize?: number
 }
 
@@ -48,28 +48,22 @@ export default function AvatarUpload(props: Props) {
       return
     }
 
-    const reader = new FileReader()
-    reader.onloadstart = () => isLoading.value = true
-    reader.onloadend = () => isLoading.value = false
-    reader.onerror = () => error.value = "文件读取失败"
-
-    reader.onload = (e) => {
-      const result = e.target?.result as string
-      preview.value = result
-      onUpload?.(result)
-    }
-
-    reader.readAsDataURL(file)
+    // 生成预览URL
+    preview.value = URL.createObjectURL(file)
+    onUpload?.(file)
   }, [onUpload, maxSize, required, initialPreview])
+
+
+  useEffect(() => {
+    if (preview.value) {
+      return () => {
+        URL.revokeObjectURL(preview.value)
+      }
+    }
+  }, [preview.value])
 
   return (
     <div className="relative border border-dashed w-40 h-40 hover:border-neutral rounded-lg overflow-hidden">
-      <input
-        type="hidden"
-        name={name}
-        value={preview.value || ""}
-        required={required}
-      />
       <div className="absolute inset-0">
         {preview.value
           ? (
@@ -90,6 +84,7 @@ export default function AvatarUpload(props: Props) {
         type="file"
         className="absolute inset-0 opacity-0 cursor-pointer"
         accept={accept}
+        name={name}
         onChange={handleFileChange}
         disabled={isLoading.value}
         required={required && !preview.value}
