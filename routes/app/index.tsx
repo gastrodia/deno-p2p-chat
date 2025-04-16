@@ -92,7 +92,6 @@ export default Home
 
 export const handler: Handlers<UpdateUserForm, AppState> = {
   GET(_, ctx) {
-    console.log(ctx.state.user)
     const { username, avatar } = ctx.state.user
     return ctx.render({
       username,

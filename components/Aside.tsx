@@ -11,7 +11,6 @@ const Aside: FunctionalComponent<LayoutProps> = ({ profile, session }) => {
       <div className="flex-1 overflow-y-auto p-4">
         {session}
       </div>
-      <div className="divider m-0"></div>
       {profile}
     </div>
   )

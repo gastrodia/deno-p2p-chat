@@ -1,24 +1,33 @@
 import { Handlers } from "$fresh/server.ts"
+import { AppState } from "../_middleware.ts"
+import { SocketService } from "@/services/session.ts"
 
-export const handler: Handlers = {
-  GET(req) {
+interface WsRequest {
+  target?: string
+}
+
+export const handler: Handlers<WsRequest, AppState> = {
+  GET(req, ctx) {
     const url = new URL(req.url)
-    const from = url.searchParams.get("id")
+    const chatWith = url.searchParams.get("target") || void 0
+    const { username, id, avatar } = ctx.state.user
+    const fromUser = { username, id, avatar }
+
     const { socket, response } = Deno.upgradeWebSocket(req)
-    if (!from) {
-      socket.close(1000, "no from")
-      return response
-    }
+
+    const sessionService = SocketService.create()
+
     socket.onopen = () => {
-      console.log("open1")
-      socket.send(JSON.stringify({ type: "B", data: "emm" }))
+      sessionService.addConnection(fromUser, socket, chatWith)
+      sessionService.broadcastChats()
     }
-    socket.onclose = (e) => {
-      console.log(e)
+    socket.onclose = () => {
+      sessionService.removeConnection(fromUser.id)
+      sessionService.broadcastChats()
     }
-    socket.onmessage = (event) => {
-      const data = JSON.parse(event.data)
-      console.log(data, 11)
+
+    socket.onmessage = (event: Event) => {
+      console.log(event)
     }
     return response
   },

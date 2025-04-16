@@ -1,4 +1,4 @@
-import {CONFIG, FILE_UPLOAD_SRC} from "@/config/index.ts"
+import { CONFIG, FILE_UPLOAD_SRC } from "@/config/index.ts"
 
 const uploadFile = async (file: File) => {
   const formData = new FormData()
@@ -7,7 +7,7 @@ const uploadFile = async (file: File) => {
     method: "POST",
     body: formData,
   })
-  const data: Array<{src: string}> = await res.json()
+  const data: Array<{ src: string }> = await res.json()
   const src = data.at(0)?.src
   if (!src) {
     throw new Error("上传失败")

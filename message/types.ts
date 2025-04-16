@@ -1,12 +1,12 @@
-export type EventMapKey = "A" | "B"
+import { SafeUser } from "@/db/user.ts"
 
-type MapTo<
-  T extends string,
-  U extends Record<
-    T,
-    unknown
-  >,
-> = {
+export type ChatUser = SafeUser & {
+  online: boolean
+}
+
+export type EventMapKey = "SESSIONS" | "ONLINE"
+
+type MapTo<T extends string, U extends Record<T, unknown>> = {
   [K in T]: {
     type: K
     data: U[K]
@@ -16,7 +16,10 @@ type MapTo<
 export type EventMap = MapTo<
   EventMapKey,
   {
-    A: string[]
-    B: string
+    SESSIONS: {
+      online: ChatUser[]
+      chats: ChatUser[]
+    }
+    ONLINE: boolean
   }
 >

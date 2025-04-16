@@ -24,21 +24,15 @@ export const useWsContext = () => {
   return value
 }
 
-const WsProvider: FunctionComponent<
-  WsProviderProps
-> = (
-  {
-    children,
-    from,
-    to,
-  },
+const WsProvider: FunctionComponent<WsProviderProps> = (
+  { children, from, to },
 ) => {
   const value = useMemo<WsProviderContext>(
     () => {
       return {
         from,
         to,
-        ws: IS_BROWSER ? createWs(`/api/ws?id=${from}`) : void 0,
+        ws: IS_BROWSER ? createWs(`/api/ws?&target=${to || ""}`) : void 0,
       }
     },
     [from, to],

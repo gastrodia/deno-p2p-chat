@@ -94,7 +94,6 @@ export const handler: Handlers<RegisterForm> = {
     const valid = RegisterSchema.safeParse(vo)
 
     if (!valid.success) {
-      console.log(valid)
       return ctx.render({
         email: vo.email, // 回填已输入邮箱
         username: vo.username,

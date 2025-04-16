@@ -1,7 +1,6 @@
 import { EventMap } from "./types.ts"
-
 class WsEmitter<T extends Record<string, { type: string }>> {
-  private listeners = new Map<keyof T, Array<(data: T[keyof T]) => void>>()
+  private listeners: { [K in keyof T]?: Array<(data: T[K]) => void> } = {}
   private ws: WebSocket
 
   constructor(url: string) {
@@ -11,10 +10,10 @@ class WsEmitter<T extends Record<string, { type: string }>> {
 
   private wsOnMessage(event: MessageEvent) {
     try {
-      const data = JSON.parse(event.data)
-      const type: keyof T = data.type
-      if (this.listeners.has(type)) {
-        this.emit(type, data)
+      const data = JSON.parse(event.data) as T[keyof T]
+      const type = data.type as keyof T
+      if (this.listeners[type]) {
+        this.emit(type, data as T[typeof type])
       }
     } catch (error) {
       console.error("Error processing message:", error)
@@ -27,24 +26,32 @@ class WsEmitter<T extends Record<string, { type: string }>> {
     }
   }
 
-  on<K extends keyof T>(key: K, callback: (data: T[keyof T]) => void) {
-    if (!this.listeners.has(key)) {
-      this.listeners.set(key, [])
+  on<K extends keyof T>(key: K, callback: (data: T[K]) => void) {
+    if (!this.listeners[key]) {
+      this.listeners[key] = []
     }
-    this.listeners.get(key)!.push(callback)
+    this.listeners[key]!.push(callback)
   }
 
-  private emit<K extends keyof T>(key: K, data: T[keyof T]) {
-    const callbacks = this.listeners.get(key)
-    if (!callbacks) {
-      return
+  off<K extends keyof T>(key: K, callback: (data: T[K]) => void) {
+    const callbacks = this.listeners[key]
+    if (callbacks) {
+      const index = callbacks.indexOf(callback)
+      if (index !== -1) {
+        callbacks.splice(index, 1)
+      }
     }
-    for (const cb of callbacks) {
-      cb(data)
+  }
+
+  private emit<K extends keyof T>(key: K, data: T[K]) {
+    const callbacks = this.listeners[key]
+    if (callbacks) {
+      for (const cb of callbacks) {
+        cb(data)
+      }
     }
   }
 }
-
 export function createWs(url: string) {
   return new WsEmitter<EventMap>(url)
 }

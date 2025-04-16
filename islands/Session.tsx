@@ -1,47 +1,57 @@
 import { useWsContext } from "./WsProvider.tsx"
-import { useEffect } from "preact/hooks"
+import { useEffect, useState } from "preact/hooks"
+import { EventMap } from "../message/types.ts"
+
+type ChatsType = EventMap["SESSIONS"]["data"]
+type ChatItemType = ChatsType["chats"][0] | ChatsType["online"][0]
+
+const ChatItem = (
+  { item, isOnline }: { item: ChatItemType; isOnline?: boolean },
+) => (
+  <a
+    key={item.id}
+    href={`/app/${item.id}`}
+    className="list-row hover:bg-gray-100"
+  >
+    <div className={`avatar ${isOnline ? "avatar-online" : ""}`}>
+      <div className="w-12">
+        <img src={item.avatar} alt={item.username} />
+      </div>
+    </div>
+    <div>{item.username}</div>
+  </a>
+)
 
 const Session = () => {
-  const list = [1, 2, 3, 4, 5]
   const wsContext = useWsContext()
+  const [chats, setChats] = useState<ChatsType>({
+    online: [],
+    chats: [],
+  })
 
-  const handleClick = () => {
-    console.log(wsContext)
-    wsContext.ws?.send({ type: "A", data: ["1"] })
+  const handleSessions = (data: EventMap["SESSIONS"]) => {
+    const { online, chats } = data.data
+    setChats({ online, chats })
   }
 
   useEffect(() => {
     const { ws } = wsContext
-    if (!ws) {
-      return
+    if (!ws) return
+    ws.on("SESSIONS", handleSessions)
+    return () => {
+      ws.off("SESSIONS", handleSessions)
     }
-    console.log(ws)
-    ws.on("B", (data) => {
-      console.log("B", data.data)
-    })
-    ws.on("B", (data) => {
-      console.log("Bc", data.data)
-    })
   }, [wsContext])
 
   return (
     <div className="list bg-base-100 rounded-box shadow-md">
-      <button type="button" className="btn" onClick={handleClick}>Default</button>
-      {list.map((item) => (
-        <a href={`/app/${item}`} className={`list-row hover:bg-gray-100`}>
-          <div>
-            <img
-              className="size-10 rounded-box"
-              src={`https://img.daisyui.com/images/profile/demo/${item}@94.webp`}
-            />
-          </div>
-          <div>
-            <div>Dio Lupa</div>
-            <div className="text-xs uppercase font-semibold opacity-60">
-              Remaining Reason
-            </div>
-          </div>
-        </a>
+      <div className="p-4 pb-2 text-xs opacity-60 tracking-wide">
+        Recent Chats
+      </div>
+      {chats.chats.map((item) => <ChatItem key={item.id} item={item} />)}
+      <div className="p-4 pb-2 text-xs opacity-60 tracking-wide">Online</div>
+      {chats.online.map((item) => (
+        <ChatItem key={item.id} item={item} isOnline />
       ))}
     </div>
   )
