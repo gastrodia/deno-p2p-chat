@@ -1,6 +1,6 @@
-import {useCallback, useEffect, useRef} from "preact/hooks"
-import {useSignal} from "@preact/signals"
-import {PlusIcon} from "@/components/Icons.tsx"
+import { useCallback, useEffect, useRef } from "preact/hooks"
+import { useSignal } from "@preact/signals"
+import { PlusIcon } from "@/components/Icons.tsx"
 
 interface Props {
   name?: string
@@ -53,7 +53,6 @@ export default function AvatarUpload(props: Props) {
     onUpload?.(file)
   }, [onUpload, maxSize, required, initialPreview])
 
-
   useEffect(() => {
     if (preview.value) {
       return () => {
@@ -73,18 +72,22 @@ export default function AvatarUpload(props: Props) {
               className="w-full h-full object-cover"
             />
           )
-          : <div className="w-full h-full flex items-center justify-center">
-            <PlusIcon className="w-4 h-4" />
-          </div>
-        }
+          : (
+            <div className="w-full h-full flex items-center justify-center">
+              <PlusIcon className="w-4 h-4" />
+            </div>
+          )}
       </div>
 
+      {fileInput.current?.value
+        ? null
+        : <input type="hidden" value={initialPreview} name={name} />}
       <input
         ref={fileInput}
         type="file"
         className="absolute inset-0 opacity-0 cursor-pointer"
         accept={accept}
-        name={name}
+        name={fileInput.current?.value ? name : void 0}
         onChange={handleFileChange}
         disabled={isLoading.value}
         required={required && !preview.value}
