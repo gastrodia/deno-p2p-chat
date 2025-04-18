@@ -1,26 +1,45 @@
 import { useWsContext } from "@/islands/WsProvider.tsx"
 import Header from "@/components/Header.tsx"
 import { FunctionComponent } from "preact"
-import { useEffect, useRef } from "preact/hooks"
-import { useSignal } from "@preact/signals"
+import { useEffect, useRef, useState } from "preact/hooks"
 import { ChatUser, EventMap } from "@/message/types.ts"
 import ChatItem from "@/components/ChatItem.tsx"
+import { Message } from "@/message/types.ts"
+import { SafeUser } from "@/db/user.ts"
 
 export interface ChatRoomProps {
   target: ChatUser
+  me: SafeUser
 }
 
-const ChatRoom: FunctionComponent<ChatRoomProps> = ({ target }) => {
+const ChatRoom: FunctionComponent<ChatRoomProps> = ({ target, me }) => {
   const wsContext = useWsContext()
-  const { ws } = wsContext
-  const chatWith = useSignal(target)
+  const { ws, from, to } = wsContext
+  const [chatWith, setChatWith] = useState(target)
   const inputRef = useRef<HTMLInputElement>(null)
+  const [chatHistory, setChatHistory] = useState<Message[]>([])
 
-  const handleOnChatWithOnline = (data: EventMap["ONLINE"]) => {
-    chatWith.value = {
-      ...chatWith.value,
+  const handleOnChatWithON_OFF = (data: EventMap["ON_OFF"]) => {
+    setChatWith({
+      ...chatWith,
       online: data.data,
-    }
+    })
+    setChatHistory(
+      (history) => {
+        return [
+          ...history,
+          {
+            type: "system",
+            content: data.data
+              ? `${chatWith.username} is online`
+              : `${chatWith.username} is offline`,
+            status: data.data ? "success" : "neutral",
+            from: "system",
+            to: "system",
+          },
+        ]
+      },
+    )
   }
 
   const handleSend = (e: Event) => {
@@ -29,14 +48,54 @@ const ChatRoom: FunctionComponent<ChatRoomProps> = ({ target }) => {
     if (!input) return
     const message = input.value
     if (!message) return
-    console.log("send message", message)
+    ws?.send({
+      type: "MESSAGE",
+      data: {
+        from,
+        to: to!,
+        type: "text",
+        content: message,
+      },
+    })
     input.value = ""
   }
 
+  const handleOnline = (data: EventMap["ONLINE"]) => {
+    setChatHistory(data.data.history)
+  }
+
+  const handleOnMessage = (data: EventMap["MESSAGE"]) => {
+    setChatHistory(
+      (history) => {
+        return [
+          ...history,
+          data.data,
+        ]
+      },
+    )
+  }
+
+  const handleOnSended = (data: EventMap["SENDED"]) => {
+    setChatHistory(
+      (history) => {
+        return [
+          ...history,
+          data.data,
+        ]
+      },
+    )
+  }
+
   useEffect(() => {
-    ws?.on("ONLINE", handleOnChatWithOnline)
+    ws?.on("ON_OFF", handleOnChatWithON_OFF)
+    ws?.on("ONLINE", handleOnline)
+    ws?.on("MESSAGE", handleOnMessage)
+    ws?.on("SENDED", handleOnSended)
     return () => {
-      ws?.off("ONLINE", handleOnChatWithOnline)
+      ws?.off("ON_OFF", handleOnChatWithON_OFF)
+      ws?.off("ONLINE", handleOnline)
+      ws?.off("MESSAGE", handleOnMessage)
+      ws?.on("SENDED", handleOnSended)
     }
   }, [ws])
 
@@ -45,16 +104,20 @@ const ChatRoom: FunctionComponent<ChatRoomProps> = ({ target }) => {
       <Header>
         <div className="flex">
           <h1 className="text-xl font-bold">
-            {chatWith.value.username}
+            {chatWith.username}
           </h1>
-          {chatWith.value.online
+          {chatWith.online
             ? <div className="badge badge-soft badge-success">Online</div>
             : <div className="badge badge-neutral badge-dash">Offline</div>}
         </div>
       </Header>
 
       <div class="flex-1 p-4 overflow-y-auto">
-        <ChatItem />
+        {chatHistory.map((message, index) => {
+          return (
+            <ChatItem key={index} message={message} me={me} target={chatWith} />
+          )
+        })}
       </div>
       <div class="border-t p-4">
         <form class="flex gap-2" onSubmit={handleSend}>

@@ -10,7 +10,7 @@ export interface SafeUser {
 export interface User extends SafeUser {
   password: string
   email: string
-  createdAt: Date
+  createdAt: number
 }
 
 export class UserDB {
@@ -67,7 +67,7 @@ export class UserDB {
       username,
       password,
       email,
-      createdAt: new Date(),
+      createdAt: Date.now(),
     }
     await this.kv.set(["users", newUser.id], newUser)
     return newUser

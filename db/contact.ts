@@ -3,7 +3,7 @@ import { SafeUser, UserDB } from "./user.ts"
 
 interface Contact {
   userId: string
-  createdAt: Date
+  createdAt: number
 }
 
 export class ContactDB {
@@ -15,7 +15,7 @@ export class ContactDB {
     this.kv = kv
   }
 
-  async queryContactUsersByUserId(userId: string): Promise<SafeUser[]> {
+  async queryContactUsersByUserId(userId: string) {
     const entries = this.kv.list<Contact>({ prefix: ["contacts", userId] })
     const userService = await UserDB.create()
     const contacts: SafeUser[] = []
@@ -39,7 +39,7 @@ export class ContactDB {
       .check({ key, versionstamp: null })
       .set(key, {
         userId: contactId,
-        createdAt: new Date(),
+        createdAt: Date.now(),
       })
       .commit()
     return result.ok

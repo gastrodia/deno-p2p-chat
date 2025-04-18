@@ -4,7 +4,38 @@ export type ChatUser = SafeUser & {
   online: boolean
 }
 
-export type EventMapKey = "SESSIONS" | "ONLINE"
+interface MessageBase {
+  createdAt?: number
+  from: string
+  to: string
+  read?: boolean
+  self?: boolean
+}
+
+export interface TextMessage extends MessageBase {
+  content: string
+  type: "text"
+}
+
+interface ImageMessage extends MessageBase {
+  url: string
+  type: "image"
+}
+
+interface SystemMessage extends MessageBase {
+  content: string
+  type: "system"
+  status: "info" | "success" | "warning" | "error" | "primary" | "neutral"
+}
+
+export type Message = TextMessage | ImageMessage | SystemMessage
+
+export type EventMapKey =
+  | "SESSIONS"
+  | "ON_OFF"
+  | "ONLINE"
+  | "MESSAGE"
+  | "SENDED"
 
 type MapTo<T extends string, U extends Record<T, unknown>> = {
   [K in T]: {
@@ -16,10 +47,17 @@ type MapTo<T extends string, U extends Record<T, unknown>> = {
 export type EventMap = MapTo<
   EventMapKey,
   {
-    SESSIONS: {
-      online: ChatUser[]
-      chats: ChatUser[]
+    SESSIONS: { // 聊天列表
+      onlines: ChatUser[] // 在线的陌生人
+      contacts: ChatUser[] // 联系人
     }
-    ONLINE: boolean
+    ON_OFF: boolean // 对方上下线
+    ONLINE: {
+      history: Message[] // 历史消息
+      chatWith?: string // 聊天对象
+    }
+    PEER: string // peerId
+    MESSAGE: Message // 消息
+    SENDED: Message // 消息
   }
 >

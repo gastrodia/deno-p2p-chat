@@ -2,11 +2,12 @@ import { Handlers, PageProps } from "$fresh/server.ts"
 import { UserDB } from "@/db/user.ts"
 import ChatRoom, { ChatRoomProps } from "@/islands/ChatRoom.tsx"
 import { SocketService } from "@/services/session.ts"
-const ChatView = (props: PageProps<ChatRoomProps>) => {
-  const { data } = props
+import { AppState } from "@/routes/_middleware.ts"
+const ChatView = (props: PageProps<ChatRoomProps, AppState>) => {
+  const { data, state } = props
   const { target } = data
   if (!target) return <h1>User not found</h1>
-  return <ChatRoom target={target} />
+  return <ChatRoom target={target} me={state.user} />
 }
 
 export default ChatView

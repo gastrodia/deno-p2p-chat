@@ -1,12 +1,11 @@
 import { useWsContext } from "./WsProvider.tsx"
 import { useEffect, useState } from "preact/hooks"
-import { EventMap } from "../message/types.ts"
+import { ChatUser, EventMap } from "../message/types.ts"
 
 type ChatsType = EventMap["SESSIONS"]["data"]
-type ChatItemType = ChatsType["chats"][0] | ChatsType["online"][0]
 
 const ChatItem = (
-  { item, isOnline }: { item: ChatItemType; isOnline?: boolean },
+  { item, isOnline }: { item: ChatUser; isOnline?: boolean },
 ) => (
   <a
     key={item.id}
@@ -25,13 +24,13 @@ const ChatItem = (
 const Session = () => {
   const wsContext = useWsContext()
   const [chats, setChats] = useState<ChatsType>({
-    online: [],
-    chats: [],
+    onlines: [],
+    contacts: [],
   })
 
   const handleSessions = (data: EventMap["SESSIONS"]) => {
-    const { online, chats } = data.data
-    setChats({ online, chats })
+    const { onlines, contacts } = data.data
+    setChats({ onlines, contacts })
   }
 
   useEffect(() => {
@@ -48,9 +47,9 @@ const Session = () => {
       <div className="p-4 pb-2 text-xs opacity-60 tracking-wide">
         Recent Chats
       </div>
-      {chats.chats.map((item) => <ChatItem key={item.id} item={item} />)}
+      {chats.contacts.map((item) => <ChatItem key={item.id} item={item} />)}
       <div className="p-4 pb-2 text-xs opacity-60 tracking-wide">Online</div>
-      {chats.online.map((item) => (
+      {chats.onlines.map((item) => (
         <ChatItem key={item.id} item={item} isOnline />
       ))}
     </div>
