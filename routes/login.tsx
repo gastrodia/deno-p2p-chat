@@ -67,6 +67,12 @@ export default function Login(props: PageProps<LoginForm>) {
               </p>
             </form>
           </fieldset>
+          <a href="https://fresh.deno.dev">
+            <img
+              src="https://fresh.deno.dev/fresh-badge.svg"
+              alt="Made with Fresh"
+            />
+          </a>
         </div>
       </div>
     </div>

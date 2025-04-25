@@ -34,7 +34,13 @@ const Home = (props: PageProps<UpdateUserForm, AppState>) => {
   const about = useMemo(() => JSON.stringify(deno, null, 2), [deno])
   return (
     <div>
-      <Header>
+      <Header
+        right={
+          <a href="https://github.com/gastrodia/deno-p2p-chat" className="link">
+            github
+          </a>
+        }
+      >
         <h1 className="text-xl font-bold">Deno P2P Chat</h1>
       </Header>
       <div className="w-80 p-4">
@@ -75,9 +81,18 @@ const Home = (props: PageProps<UpdateUserForm, AppState>) => {
           </form>
         </fieldset>
       </div>
+
       <div className="collapse collapse-arrow bg-base-100 border-base-300 border">
         <input type="checkbox" />
-        <div className="collapse-title font-semibold">ABOUT ?</div>
+        <div className="collapse-title font-semibold">
+          ABOUT ?
+          <a href="https://fresh.deno.dev">
+            <img
+              src="https://fresh.deno.dev/fresh-badge.svg"
+              alt="Made with Fresh"
+            />
+          </a>
+        </div>
         <div className="collapse-content text-sm w-full overflow-x-auto">
           <pre>
             {about}

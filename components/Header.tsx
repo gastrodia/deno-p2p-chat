@@ -1,7 +1,9 @@
-import { FunctionComponent } from "preact"
+import { FunctionComponent, JSX } from "preact"
 import { MenuIcon } from "@/components/Icons.tsx"
-const Header: FunctionComponent = (props) => {
-  const { children } = props
+const Header: FunctionComponent<{
+  right?: JSX.Element
+}> = (props) => {
+  const { children, right } = props
   return (
     <header className="flex items-center justify-between p-4 bg-base-100 border-b">
       <div>
@@ -15,7 +17,9 @@ const Header: FunctionComponent = (props) => {
       <div className="flex-1">
         {children}
       </div>
-      <div></div>
+      <div>
+        {right}
+      </div>
     </header>
   )
 }

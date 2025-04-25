@@ -79,6 +79,12 @@ export default function Register(props: PageProps<RegisterForm>) {
               </p>
             </form>
           </fieldset>
+          <a href="https://fresh.deno.dev">
+            <img
+              src="https://fresh.deno.dev/fresh-badge.svg"
+              alt="Made with Fresh"
+            />
+          </a>
         </div>
       </div>
     </div>
