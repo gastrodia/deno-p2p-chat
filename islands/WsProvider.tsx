@@ -32,7 +32,17 @@ const WsProvider: FunctionComponent<WsProviderProps> = (
       return {
         from,
         to,
-        ws: IS_BROWSER ? createWs(`/api/ws?&target=${to || ""}`) : void 0,
+        ws: IS_BROWSER
+          ? createWs(`/api/ws?&target=${to || ""}`, (ws) => {
+            ws.send({
+              type: "PING",
+              data: {
+                target: from,
+                timestamp: Date.now(),
+              },
+            })
+          })
+          : void 0,
       }
     },
     [from, to],

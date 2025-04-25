@@ -18,6 +18,13 @@ const ChatRoom: FunctionComponent<ChatRoomProps> = ({ target, me }) => {
   const [chatWith, setChatWith] = useState(target)
   const inputRef = useRef<HTMLInputElement>(null)
   const [chatHistory, setChatHistory] = useState<Message[]>([])
+  const chatContainerRef = useRef<HTMLDivElement>(null)
+
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+    }
+  }
 
   const handleOnChatWithON_OFF = (data: EventMap["ON_OFF"]) => {
     setChatWith({
@@ -61,7 +68,12 @@ const ChatRoom: FunctionComponent<ChatRoomProps> = ({ target, me }) => {
   }
 
   const handleOnline = (data: EventMap["ONLINE"]) => {
-    setChatHistory(data.data.history)
+    setChatHistory((history) => {
+      return [
+        ...history,
+        ...data.data.history,
+      ]
+    })
   }
 
   const handleOnMessage = (data: EventMap["MESSAGE"]) => {
@@ -95,9 +107,13 @@ const ChatRoom: FunctionComponent<ChatRoomProps> = ({ target, me }) => {
       ws?.off("ON_OFF", handleOnChatWithON_OFF)
       ws?.off("ONLINE", handleOnline)
       ws?.off("MESSAGE", handleOnMessage)
-      ws?.on("SENDED", handleOnSended)
+      ws?.off("SENDED", handleOnSended)
     }
   }, [ws])
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [chatHistory])
 
   return (
     <div className="flex flex-col h-screen w-full overflow-hidden">
@@ -112,7 +128,7 @@ const ChatRoom: FunctionComponent<ChatRoomProps> = ({ target, me }) => {
         </div>
       </Header>
 
-      <div class="flex-1 p-4 overflow-y-auto">
+      <div ref={chatContainerRef} class="flex-1 p-4 overflow-y-auto">
         {chatHistory.map((message, index) => {
           return (
             <ChatItem key={index} message={message} me={me} target={chatWith} />

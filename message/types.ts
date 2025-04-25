@@ -17,9 +17,10 @@ export interface TextMessage extends MessageBase {
   type: "text"
 }
 
-interface ImageMessage extends MessageBase {
-  url: string
+export interface ImageMessage extends MessageBase {
+  url?: string
   type: "image"
+  fileRaw?: File
 }
 
 interface SystemMessage extends MessageBase {
@@ -30,12 +31,29 @@ interface SystemMessage extends MessageBase {
 
 export type Message = TextMessage | ImageMessage | SystemMessage
 
+export interface Contact {
+  userId: string
+  createdAt: number
+  lastMessage: string // 最后一条消息
+  lastMessageFrom: string // 最后一条消息来自谁
+  lastMessageAt: number // 最后一条消息的时间
+  read?: boolean // 已读
+}
+
+export interface ContactUser extends Contact {
+  avatar: string
+  username: string
+  online?: boolean
+}
+
 export type EventMapKey =
   | "SESSIONS"
   | "ON_OFF"
   | "ONLINE"
   | "MESSAGE"
   | "SENDED"
+  | "PING"
+  | "PONG"
 
 type MapTo<T extends string, U extends Record<T, unknown>> = {
   [K in T]: {
@@ -49,7 +67,7 @@ export type EventMap = MapTo<
   {
     SESSIONS: { // 聊天列表
       onlines: ChatUser[] // 在线的陌生人
-      contacts: ChatUser[] // 联系人
+      contacts: ContactUser[] // 联系人
     }
     ON_OFF: boolean // 对方上下线
     ONLINE: {
@@ -59,5 +77,7 @@ export type EventMap = MapTo<
     PEER: string // peerId
     MESSAGE: Message // 消息
     SENDED: Message // 消息
+    PING: { timestamp: number; target: string } // 心跳检测请求
+    PONG: { timestamp: number } // 心跳检测响应
   }
 >

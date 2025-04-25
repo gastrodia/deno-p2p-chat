@@ -21,7 +21,7 @@ export class ChatDB {
       message.from,
       message.to,
     )
-    const key = ["chats", smallerId, biggerId]
+    const key = ["chats", smallerId, biggerId, message.createdAt || Date.now()]
     await this.kv.set(key, message)
   }
 
@@ -31,12 +31,30 @@ export class ChatDB {
     const prefix = ["chats", smallerId, biggerId]
     const data = this.kv.list<Message>({ prefix })
     const messages: Message[] = []
+    const updates: Promise<void>[] = []
+
     for await (const item of data) {
-      messages.push({
+      const message = {
         ...item.value,
         self: item.value.from === from,
-      })
+      }
+      messages.push(message)
+
+      // 如果消息是发给当前用户的且未读，则标记为已读
+      if (message.to === from && !message.read) {
+        const key = ["chats", smallerId, biggerId, item.value.createdAt || 0]
+        updates.push(
+          this.kv.atomic()
+            .check(item)
+            .set(key, { ...item.value, read: true })
+            .commit()
+            .then(() => {}),
+        )
+      }
     }
+
+    // 等待所有更新完成
+    await Promise.all(updates)
     return messages
   }
 

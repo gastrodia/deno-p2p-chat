@@ -1,16 +1,24 @@
 // 维护在线用户的websocket
 
 import { SafeUser } from "@/db/user.ts"
-import { ChatUser, EventMap, Message, TextMessage } from "../message/types.ts"
+import {
+  ChatUser,
+  ContactUser,
+  EventMap,
+  ImageMessage,
+  Message,
+  TextMessage,
+} from "../message/types.ts"
 import { ContactDB } from "@/db/contact.ts"
 import { ChatDB } from "@/db/chats.ts"
+import uploadFile from "@/utils/uploadFile.ts"
 
 export class SocketService {
   public connections = new Map<string, {
     socket: WebSocket // WebSocket connection
     user: SafeUser // User information
     // 好友列表
-    contacts: SafeUser[]
+    contacts: ContactUser[]
   }>()
   // 映射关系  谁和谁聊天
   chatsMap = new Map<string, string | undefined>()
@@ -27,14 +35,17 @@ export class SocketService {
   async addConnection(user: SafeUser, socket: WebSocket, chatWith?: string) {
     // 获取这个人的好友列表
     const contactService = await ContactDB.create()
+    if (chatWith) {
+      // 把未读消息设为已读
+      await contactService.setContactRead(user.id, chatWith)
+    }
     const contacts = await contactService.queryContactUsersByUserId(user.id)
     this.connections.set(user.id, { socket, user, contacts })
     this.chatsMap.set(user.id, chatWith)
     this.sendToChatWith(user.id, true)
-    this.broadcastSessions()
     // 判断chatWith是否是好友
     if (chatWith) {
-      const isContact = contacts.some((v) => v.id === chatWith)
+      const isContact = contacts.some((v) => v.userId === chatWith)
       if (isContact) {
         const chatService = await ChatDB.create()
         const history = await chatService.getMessages(user.id, chatWith)
@@ -46,6 +57,7 @@ export class SocketService {
     this.sendToUser(user.id, "ONLINE", {
       history: [],
     })
+    this.broadcastSessions()
   }
 
   // 某一方断开连接 清除这个人的连接 并清除对方的chatWith
@@ -56,22 +68,22 @@ export class SocketService {
     this.broadcastSessions()
   }
 
-  getContacts(userId: string): ChatUser[] {
+  getContacts(userId: string): ContactUser[] {
     const value = this.connections.get(userId)
     if (!value) {
       return []
     }
     return value.contacts.map((v) => ({
       ...v,
-      online: this.isOnline(v.id),
+      online: this.isOnline(v.userId),
     }))
   }
 
   // 获取陌生人列表 即不在好友列表中的用户和自己
-  getStrangers(userId: string, contacts: SafeUser[]): ChatUser[] {
+  getStrangers(userId: string, contacts: ContactUser[]): ChatUser[] {
     const onlines = this.getOnlineUsers()
     return onlines.filter((v) => {
-      return v.id !== userId && !contacts.some((c) => c.id === v.id)
+      return v.id !== userId && !contacts.some((c) => c.userId === v.id)
     })
   }
 
@@ -112,21 +124,27 @@ export class SocketService {
     return this.connections.has(userId)
   }
 
-  eventHandle<K extends keyof EventMap>(type: K, data: EventMap[K]) {
-    this.eventHandleMap[type]?.(data)
+  async eventHandle<K extends keyof EventMap>(type: K, data: EventMap[K]) {
+    await this.eventHandleMap[type]?.(data)
   }
 
   eventHandleMap: {
     [K in keyof EventMap]?: (data: EventMap[K]) => void
   } = {
-    MESSAGE: ({ data }) => this.messageHandle(data),
+    MESSAGE: async ({ data }) => await this.messageHandle(data),
+    PING: ({ data }) => {
+      this.sendToUser(data.target, "PONG", data)
+    },
   }
 
-  messageHandle(message: Message) {
+  async messageHandle(message: Message) {
     const { type } = message
     switch (type) {
       case "text":
-        this.onTextMessage(message)
+        await this.onTextMessage(message)
+        break
+      case "image":
+        await this.onImageMessage(message)
         break
     }
   }
@@ -142,7 +160,7 @@ export class SocketService {
     }
   }
 
-  onTextMessage(payload: TextMessage) {
+  async onTextMessage(payload: TextMessage) {
     const message = this.handleMessageBefore(payload)
     const { read } = message
     if (read) {
@@ -151,6 +169,58 @@ export class SocketService {
         self: false,
       })
     }
+    // 保存消息
+    await this.saveMessage(message)
+  }
+
+  async onImageMessage(payload: ImageMessage) {
+    const message = this.handleMessageBefore(payload)
+    const { read, fileRaw } = message
+    // 上传图片
+    if (fileRaw) {
+      const url = await uploadFile(fileRaw)
+      message.url = url
+    }
+    if (read) {
+      this.sendToUser(message.to, "MESSAGE", {
+        ...message,
+        self: false,
+      })
+    }
+    // 保存消息
+    await this.saveMessage(message)
+  }
+
+  async saveMessage(message: Message) {
+    const chatService = await ChatDB.create()
+    await chatService.saveMessage(message)
+    // 保存联系人
+    const contactService = await ContactDB.create()
+    const { from, to, type, createdAt, read } = message
+    let lastMessage = ""
+    if (type === "text") {
+      lastMessage = message.content || ""
+    } else if (type === "image") {
+      lastMessage = "[IMAGE]"
+    }
+    await contactService.addBidirectionalContact(
+      from,
+      to,
+      lastMessage,
+      createdAt!,
+      read,
+    )
+    const fromItem = this.connections.get(from)
+    if (fromItem) {
+      const contacts = await contactService.queryContactUsersByUserId(from)
+      fromItem.contacts = contacts
+    }
+    const toItem = this.connections.get(to)
+    if (toItem) {
+      const contacts = await contactService.queryContactUsersByUserId(to)
+      toItem.contacts = contacts
+    }
+    this.broadcastSessions()
     this.sendToUser(message.from, "SENDED", {
       ...message,
       self: true,

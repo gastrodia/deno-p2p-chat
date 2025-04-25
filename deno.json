@@ -7,7 +7,7 @@
     "start": "deno run -A --unstable-kv --watch=static/,routes/ dev.ts",
     "debugger": "deno run -A --unstable-kv --inspect --watch=static/,routes/ dev.ts",
     "build": "deno run -A dev.ts build",
-    "preview": "deno run -A main.ts",
+    "preview": "deno run -A --unstable-kv main.ts",
     "update": "deno run -A -r https://fresh.deno.dev/update ."
   },
   "lint": {

@@ -24,10 +24,10 @@ export const handler: Handlers<WsRequest, AppState> = {
       sessionService.removeConnection(fromUser.id)
     }
 
-    socket.onmessage = (event: MessageEvent) => {
+    socket.onmessage = async (event: MessageEvent) => {
       const payload = JSON.parse(event.data)
       const type = payload.type
-      sessionService.eventHandle(type, payload)
+      await sessionService.eventHandle(type, payload)
     }
     return response
   },

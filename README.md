@@ -5,7 +5,6 @@
 - Deploy in Deno Deploy
 - Storage in Deno KV
 - Using Daisyui
-- PeerJS for WebRTC
 
 ```
 deno task start
