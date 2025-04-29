@@ -32,9 +32,25 @@ const ChatForm: FunctionComponent<ChatFormProps> = ({
     input.selectionStart = input.selectionEnd = start + emoji.length
   }
 
+  const handleEmojiOpen = () => {
+    const input = inputRef.current
+    if (!input) return
+    input.readOnly = true
+  }
+
+  const handleEmojiClose = () => {
+    const input = inputRef.current
+    if (!input) return
+    input.readOnly = false
+  }
+
   return (
     <form class="flex gap-2 relative" onSubmit={handleSend}>
-      <EmojiPicker onSelect={handleEmojiSelect} />
+      <EmojiPicker
+        onSelect={handleEmojiSelect}
+        onOpen={handleEmojiOpen}
+        onClose={handleEmojiClose}
+      />
       <input
         autocomplete="off"
         ref={inputRef}

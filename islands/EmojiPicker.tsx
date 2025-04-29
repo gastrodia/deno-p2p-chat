@@ -11,10 +11,14 @@ interface EmojiCategory {
 
 interface EmojiPickerProps {
   onSelect: (emoji: string) => void
+  onOpen?: () => void
+  onClose?: () => void
 }
 
 const EmojiPicker: FunctionComponent<EmojiPickerProps> = ({
   onSelect,
+  onOpen,
+  onClose,
 }) => {
   const [categories, setCategories] = useState<EmojiCategory[]>([])
   const [loading, setLoading] = useState(false)
@@ -52,6 +56,9 @@ const EmojiPicker: FunctionComponent<EmojiPickerProps> = ({
 
     if (visible) {
       document.addEventListener("click", handleClickOutside)
+      onOpen?.()
+    } else {
+      onClose?.()
     }
 
     return () => {
