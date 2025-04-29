@@ -14,7 +14,9 @@ import * as $app_index from "./routes/app/index.tsx"
 import * as $login from "./routes/login.tsx"
 import * as $register from "./routes/register.tsx"
 import * as $AvatarUpload from "./islands/AvatarUpload.tsx"
+import * as $ChatForm from "./islands/ChatForm.tsx"
 import * as $ChatRoom from "./islands/ChatRoom.tsx"
+import * as $EmojiPicker from "./islands/EmojiPicker.tsx"
 import * as $Session from "./islands/Session.tsx"
 import * as $WsProvider from "./islands/WsProvider.tsx"
 import type { Manifest } from "$fresh/server.ts"
@@ -35,7 +37,9 @@ const manifest = {
   },
   islands: {
     "./islands/AvatarUpload.tsx": $AvatarUpload,
+    "./islands/ChatForm.tsx": $ChatForm,
     "./islands/ChatRoom.tsx": $ChatRoom,
+    "./islands/EmojiPicker.tsx": $EmojiPicker,
     "./islands/Session.tsx": $Session,
     "./islands/WsProvider.tsx": $WsProvider,
   },

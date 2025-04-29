@@ -6,7 +6,8 @@
     "manifest": "deno task cli manifest $(pwd)",
     "start": "deno run -A --unstable-kv --watch=static/,routes/ dev.ts",
     "debugger": "deno run -A --unstable-kv --inspect --watch=static/,routes/ dev.ts",
-    "build": "deno run -A dev.ts build",
+    "emoji": "deno run -A utils/fetchEmojis.ts",
+    "build": "deno task emoji && deno run -A dev.ts build",
     "preview": "deno run -A --unstable-kv main.ts",
     "update": "deno run -A -r https://fresh.deno.dev/update ."
   },
@@ -24,6 +25,7 @@
   "imports": {
     "@/": "./",
     "$fresh/": "https://deno.land/x/fresh@1.7.3/",
+    "@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@^0.1.49",
     "daisyui": "https://esm.sh/daisyui",
     "preact": "https://esm.sh/preact@10.22.0",
     "preact/": "https://esm.sh/preact@10.22.0/",

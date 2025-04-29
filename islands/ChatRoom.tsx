@@ -6,6 +6,7 @@ import { ChatUser, EventMap } from "@/message/types.ts"
 import ChatItem from "@/components/ChatItem.tsx"
 import { Message } from "@/message/types.ts"
 import { SafeUser } from "@/db/user.ts"
+import ChatForm from "./ChatForm.tsx"
 
 export interface ChatRoomProps {
   target: ChatUser
@@ -16,7 +17,6 @@ const ChatRoom: FunctionComponent<ChatRoomProps> = ({ target, me }) => {
   const wsContext = useWsContext()
   const { ws, from, to } = wsContext
   const [chatWith, setChatWith] = useState(target)
-  const inputRef = useRef<HTMLInputElement>(null)
   const [chatHistory, setChatHistory] = useState<Message[]>([])
   const chatContainerRef = useRef<HTMLDivElement>(null)
 
@@ -49,12 +49,7 @@ const ChatRoom: FunctionComponent<ChatRoomProps> = ({ target, me }) => {
     )
   }
 
-  const handleSend = (e: Event) => {
-    e.preventDefault()
-    const input = inputRef.current
-    if (!input) return
-    const message = input.value
-    if (!message) return
+  const handleSendText = (message: string) => {
     ws?.send({
       type: "MESSAGE",
       data: {
@@ -64,7 +59,6 @@ const ChatRoom: FunctionComponent<ChatRoomProps> = ({ target, me }) => {
         content: message,
       },
     })
-    input.value = ""
   }
 
   const handleOnline = (data: EventMap["ONLINE"]) => {
@@ -116,7 +110,7 @@ const ChatRoom: FunctionComponent<ChatRoomProps> = ({ target, me }) => {
   }, [chatHistory])
 
   return (
-    <div className="flex flex-col h-screen w-full overflow-hidden">
+    <div className="flex flex-col h-dvh w-full overflow-hidden">
       <Header>
         <div className="flex">
           <h1 className="text-xl font-bold">
@@ -136,19 +130,7 @@ const ChatRoom: FunctionComponent<ChatRoomProps> = ({ target, me }) => {
         })}
       </div>
       <div class="border-t p-4">
-        <form class="flex gap-2" onSubmit={handleSend}>
-          <input
-            autocomplete="off"
-            ref={inputRef}
-            name="message"
-            type="text"
-            placeholder="Type your message..."
-            class="input input-bordered flex-1"
-          />
-          <button type="submit" class="btn btn-neutral h-10 overflow-hidden">
-            Send
-          </button>
-        </form>
+        <ChatForm handleSendText={handleSendText} />
       </div>
     </div>
   )
