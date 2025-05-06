@@ -5,8 +5,8 @@ import { SocketService } from "@/services/session.ts"
 import { AppState } from "@/routes/_middleware.ts"
 const ChatView = (props: PageProps<ChatRoomProps, AppState>) => {
   const { data, state } = props
+  if (!data || !data.target) return <h1>User not found</h1>
   const { target } = data
-  if (!target) return <h1>User not found</h1>
   return <ChatRoom target={target} me={state.user} />
 }
 
