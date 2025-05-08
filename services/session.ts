@@ -19,11 +19,18 @@ export class SocketService {
     user: SafeUser // User information
     // 好友列表
     contacts: ContactUser[]
+    // 映射关系  谁和谁聊天
+    chatWith?: string
   }>()
-  // 映射关系  谁和谁聊天
-  chatsMap = new Map<string, string | undefined>()
 
   private static instance: SocketService | null = null
+
+  displayConnections() {
+    return Array.from(this.connections.entries()).map(([key, value]) => ({
+      key: key,
+      ...value
+    }))
+  }
 
   getOnlineUsers() {
     return Array.from(this.connections.values()).map((v) => ({
@@ -40,8 +47,8 @@ export class SocketService {
       await contactService.setContactRead(user.id, chatWith)
     }
     const contacts = await contactService.queryContactUsersByUserId(user.id)
-    this.connections.set(user.id, { socket, user, contacts })
-    this.chatsMap.set(user.id, chatWith)
+    this.connections.set(user.id, { socket, user, contacts, chatWith })
+    // this.chatsMap.set(user.id, chatWith)
     this.sendToChatWith(user.id, true)
     // 判断chatWith是否是好友
     if (chatWith) {
@@ -53,17 +60,19 @@ export class SocketService {
           history,
         })
       }
+    } else {
+      this.sendToUser(user.id, "ONLINE", {
+        history: [],
+      })
     }
-    this.sendToUser(user.id, "ONLINE", {
-      history: [],
-    })
+    
     this.broadcastSessions()
   }
 
   // 某一方断开连接 清除这个人的连接 并清除对方的chatWith
   removeConnection(userId: string) {
     this.connections.delete(userId)
-    this.chatsMap.delete(userId)
+    // this.chatsMap.delete(userId)
     this.sendToChatWith(userId, false)
     this.broadcastSessions()
   }
@@ -152,7 +161,8 @@ export class SocketService {
   handleMessageBefore<T extends Message>(message: T): T {
     // 判断对方有没有读消息
     const { from, to } = message
-    const chatWith = this.chatsMap.get(to)
+    // const chatWith = this.chatsMap.get(to)
+    const chatWith = this.connections.get(to)?.chatWith
     return {
       ...message,
       read: chatWith === from,
@@ -228,8 +238,8 @@ export class SocketService {
   }
 
   sendToChatWith(userId: string, online: boolean) {
-    for (const [key, value] of this.chatsMap.entries()) {
-      if (value === userId) {
+    for (const [key, value] of this.connections.entries()) {
+      if (value.chatWith === userId) {
         this.sendToUser(key, "ON_OFF", online)
       }
     }
