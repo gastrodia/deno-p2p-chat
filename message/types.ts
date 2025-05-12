@@ -20,7 +20,6 @@ export interface TextMessage extends MessageBase {
 export interface ImageMessage extends MessageBase {
   url?: string
   type: "image"
-  fileRaw?: File
 }
 
 interface SystemMessage extends MessageBase {

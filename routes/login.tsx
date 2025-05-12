@@ -59,7 +59,7 @@ export default function Login(props: PageProps<LoginForm>) {
 
               <button className="btn btn-neutral" type="submit">Sign in</button>
 
-              <p class="mt-4">
+              <p className="mt-4">
                 No account?
                 <a className="link ml-4" href="/register">
                   Create an account

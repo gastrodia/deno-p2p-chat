@@ -26,6 +26,7 @@
     "@/": "./",
     "$fresh/": "https://deno.land/x/fresh@1.7.3/",
     "@b-fuze/deno-dom": "jsr:@b-fuze/deno-dom@^0.1.49",
+    "@types/wicg-file-system-access": "npm:@types/wicg-file-system-access@^2023.10.6",
     "daisyui": "https://esm.sh/daisyui",
     "preact": "https://esm.sh/preact@10.22.0",
     "preact/": "https://esm.sh/preact@10.22.0/",
@@ -40,7 +41,10 @@
   },
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "preact"
+    "jsxImportSource": "preact",
+    "types": [
+      "@types/wicg-file-system-access"
+    ]
   },
   "nodeModulesDir": "auto",
   "fmt": {

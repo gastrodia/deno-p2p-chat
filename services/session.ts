@@ -185,12 +185,7 @@ export class SocketService {
 
   async onImageMessage(payload: ImageMessage) {
     const message = this.handleMessageBefore(payload)
-    const { read, fileRaw } = message
-    // 上传图片
-    if (fileRaw) {
-      const url = await uploadFile(fileRaw)
-      message.url = url
-    }
+    const { read } = message
     if (read) {
       this.sendToUser(message.to, "MESSAGE", {
         ...message,

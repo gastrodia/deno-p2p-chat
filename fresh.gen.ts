@@ -7,6 +7,7 @@ import * as $_app from "./routes/_app.tsx"
 import * as $_middleware from "./routes/_middleware.ts"
 import * as $api_avatar from "./routes/api/avatar.ts"
 import * as $api_session from "./routes/api/session.ts"
+import * as $api_upload from "./routes/api/upload.ts"
 import * as $api_users from "./routes/api/users.ts"
 import * as $api_ws from "./routes/api/ws.ts"
 import * as $app_id_ from "./routes/app/[id].tsx"
@@ -18,6 +19,8 @@ import * as $AvatarUpload from "./islands/AvatarUpload.tsx"
 import * as $ChatForm from "./islands/ChatForm.tsx"
 import * as $ChatRoom from "./islands/ChatRoom.tsx"
 import * as $EmojiPicker from "./islands/EmojiPicker.tsx"
+import * as $ImgPicker from "./islands/ImgPicker.tsx"
+import * as $Popover from "./islands/Popover.tsx"
 import * as $Session from "./islands/Session.tsx"
 import * as $WsProvider from "./islands/WsProvider.tsx"
 import type { Manifest } from "$fresh/server.ts"
@@ -29,6 +32,7 @@ const manifest = {
     "./routes/_middleware.ts": $_middleware,
     "./routes/api/avatar.ts": $api_avatar,
     "./routes/api/session.ts": $api_session,
+    "./routes/api/upload.ts": $api_upload,
     "./routes/api/users.ts": $api_users,
     "./routes/api/ws.ts": $api_ws,
     "./routes/app/[id].tsx": $app_id_,
@@ -42,6 +46,8 @@ const manifest = {
     "./islands/ChatForm.tsx": $ChatForm,
     "./islands/ChatRoom.tsx": $ChatRoom,
     "./islands/EmojiPicker.tsx": $EmojiPicker,
+    "./islands/ImgPicker.tsx": $ImgPicker,
+    "./islands/Popover.tsx": $Popover,
     "./islands/Session.tsx": $Session,
     "./islands/WsProvider.tsx": $WsProvider,
   },

@@ -71,7 +71,7 @@ export default function Register(props: PageProps<RegisterForm>) {
                 Sign up
               </button>
 
-              <p class="mt-4">
+              <p className="mt-4">
                 Already have an account?
                 <a className="link ml-4" href="/login">
                   Sign in

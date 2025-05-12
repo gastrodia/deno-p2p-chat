@@ -75,6 +75,15 @@ const RenderContent: FunctionComponent<{
   if (type === "text") {
     return <>{message.content}</>
   }
+  if (type === "image") {
+    return (
+      <img
+        className="max-w-48"
+        src={message.url}
+        alt="image"
+      />
+    )
+  }
   return <h1>empty</h1>
 }
 

@@ -92,6 +92,18 @@ const ChatRoom: FunctionComponent<ChatRoomProps> = ({ target, me }) => {
     )
   }
 
+  const handleSendImg = (url: string) => {
+    ws?.send({
+      type: "MESSAGE",
+      data: {
+        from,
+        to: to!,
+        type: "image",
+        url,
+      },
+    })
+  }
+
   useEffect(() => {
     ws?.on("ON_OFF", handleOnChatWithON_OFF)
     ws?.on("ONLINE", handleOnline)
@@ -122,15 +134,18 @@ const ChatRoom: FunctionComponent<ChatRoomProps> = ({ target, me }) => {
         </div>
       </Header>
 
-      <div ref={chatContainerRef} class="flex-1 p-4 overflow-y-auto">
+      <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto">
         {chatHistory.map((message, index) => {
           return (
             <ChatItem key={index} message={message} me={me} target={chatWith} />
           )
         })}
       </div>
-      <div class="border-t p-4">
-        <ChatForm handleSendText={handleSendText} />
+      <div className="border-t p-4">
+        <ChatForm
+          handleSendText={handleSendText}
+          handleSendImg={handleSendImg}
+        />
       </div>
     </div>
   )

@@ -1,13 +1,16 @@
 import { FunctionComponent } from "preact/src/index.d.ts"
 import { useRef } from "preact/hooks"
 import EmojiPicker from "./EmojiPicker.tsx"
+import ImgPicker from "./ImgPicker.tsx"
 
 interface ChatFormProps {
   handleSendText: (message: string) => void
+  handleSendImg: (src: string) => void
 }
 
 const ChatForm: FunctionComponent<ChatFormProps> = ({
   handleSendText,
+  handleSendImg,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -44,8 +47,10 @@ const ChatForm: FunctionComponent<ChatFormProps> = ({
     input.readOnly = false
   }
 
+
   return (
-    <form class="flex gap-2 relative" onSubmit={handleSend}>
+    <form className="flex gap-2 relative" onSubmit={handleSend}>
+      <ImgPicker onSend={handleSendImg}/>
       <EmojiPicker
         onSelect={handleEmojiSelect}
         onOpen={handleEmojiOpen}
@@ -57,9 +62,9 @@ const ChatForm: FunctionComponent<ChatFormProps> = ({
         name="message"
         type="text"
         placeholder="Type your message..."
-        class="input input-bordered flex-1"
+        className="input input-bordered flex-1"
       />
-      <button type="submit" class="btn btn-neutral h-10 overflow-hidden">
+      <button type="submit" className="btn btn-neutral h-10 overflow-hidden">
         🚀Send
       </button>
     </form>

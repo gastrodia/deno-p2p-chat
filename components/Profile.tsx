@@ -14,7 +14,7 @@ const Profile: FunctionalComponent<User> = (props) => {
         <div className="uppercase font-semibold ">
           {props.username}
         </div>
-        <div class="opacity-60 text-xs ">
+        <div className="opacity-60 text-xs ">
           {props.email}
         </div>
       </div>

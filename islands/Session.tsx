@@ -16,7 +16,7 @@ const ContactItem: FunctionComponent<{ item: ContactUser }> = ({ item }) => (
         <img src={item.avatar} alt={item.username} />
       </div>
     </div>
-    <div class="overflow-hidden">
+    <div className="overflow-hidden">
       <div>
         {item.username}
         {item.read ? null : (
